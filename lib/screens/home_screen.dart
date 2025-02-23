@@ -10,12 +10,18 @@ class HomeScreen extends StatelessWidget {
         title: const Text('サプリメント管理'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            // サプリメント追加画面に遷移
-          },
-          child: const Text('サプリメントを追加'),
-        ),
+        // child: ElevatedButton(
+        //   onPressed: () {
+        //     // サプリメント追加画面に遷移
+        //   },
+        //   child: const Text('サプリメントを追加'),
+        // ),
+      ),
+       floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // ボタンが押されたときの処理をここに追加
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
