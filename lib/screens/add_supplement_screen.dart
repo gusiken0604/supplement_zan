@@ -13,6 +13,7 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _dailyConsumptionController = TextEditingController(); // 消費速度用コントローラー
   final DBHelper _dbHelper = DBHelper();
 
   Future<void> _saveSupplement() async {
@@ -20,6 +21,7 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
       final newSupplement = Supplement(
         name: _nameController.text,
         quantity: int.parse(_quantityController.text),
+        dailyConsumption: int.parse(_dailyConsumptionController.text), // 消費速度を追加
       );
 
       await _dbHelper.insertSupplement(newSupplement);
@@ -59,6 +61,21 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return '数量を入力してください';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return '有効な数字を入力してください';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _dailyConsumptionController,
+                decoration: const InputDecoration(labelText: '1日に消費する量'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return '1日に消費する量を入力してください';
                   }
                   if (int.tryParse(value) == null) {
                     return '有効な数字を入力してください';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database/db_helper.dart';
 import '../models/supplement.dart';
 import 'add_supplement_screen.dart';
+import 'package:intl/intl.dart'; // 日付フォーマット用
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,6 +39,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String _calculateDepletionDate(Supplement supplement) {
+    if (supplement.dailyConsumption == 0) return '消費速度が設定されていません';
+    final daysLeft = supplement.quantity / supplement.dailyConsumption;
+    final depletionDate = DateTime.now().add(Duration(days: daysLeft.toInt()));
+    return DateFormat('yyyy/MM/dd').format(depletionDate);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final supplement = _supplements[index];
                 return ListTile(
                   title: Text(supplement.name),
-                  subtitle: Text('数量: ${supplement.quantity}'),
+                  subtitle: Text('数量: ${supplement.quantity}\n残量ゼロ予定日: ${_calculateDepletionDate(supplement)}'),
                 );
               },
             ),

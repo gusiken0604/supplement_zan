@@ -21,7 +21,8 @@ class DBHelper {
           CREATE TABLE supplements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            quantity INTEGER NOT NULL
+            quantity INTEGER NOT NULL,
+            dailyConsumption INTEGER NOT NULL
           )
         ''');
       },
