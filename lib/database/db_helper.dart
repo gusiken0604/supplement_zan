@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/supplement.dart';
+import 'package:supplement_zan/models/supplement.dart'; // Supplement クラスをインポート
 
 class DBHelper {
   static Database? _database;
@@ -18,11 +18,11 @@ class DBHelper {
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
-          CREATE TABLE supplements (
+          CREATE TABLE supplements(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            quantity INTEGER NOT NULL,
-            dailyConsumption INTEGER NOT NULL
+            name TEXT,
+            quantity INTEGER,
+            dailyConsumption INTEGER
           )
         ''');
       },
@@ -32,6 +32,16 @@ class DBHelper {
   Future<int> insertSupplement(Supplement supplement) async {
     final db = await database;
     return await db.insert('supplements', supplement.toMap());
+  }
+
+  Future<int> updateSupplement(Supplement supplement) async {
+    final db = await database;
+    return await db.update(
+      'supplements',
+      supplement.toMap(),
+      where: 'id = ?',
+      whereArgs: [supplement.id],
+    );
   }
 
   Future<List<Supplement>> getAllSupplements() async {

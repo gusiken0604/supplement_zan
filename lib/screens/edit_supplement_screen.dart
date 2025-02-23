@@ -1,40 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:supplement_zan/database/db_helper.dart' as db;
-import 'package:supplement_zan/models/supplement.dart' as model;
+import 'package:supplement_zan/database/db_helper.dart'; // 正しいパスを指定
+import 'package:supplement_zan/models/supplement.dart';
 
-class AddSupplementScreen extends StatefulWidget {
+class EditSupplementScreen extends StatefulWidget {
+  final Supplement supplement;
+
+  const EditSupplementScreen({super.key, required this.supplement});
+
   @override
-  _AddSupplementScreenState createState() => _AddSupplementScreenState();
+  _EditSupplementScreenState createState() => _EditSupplementScreenState();
 }
 
-class _AddSupplementScreenState extends State<AddSupplementScreen> {
+class _EditSupplementScreenState extends State<EditSupplementScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _quantityController;
   late TextEditingController _dailyConsumptionController;
+  final DBHelper _dbHelper = DBHelper();
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _quantityController = TextEditingController();
-    _dailyConsumptionController = TextEditingController();
+    _nameController = TextEditingController(text: widget.supplement.name);
+    _quantityController = TextEditingController(text: widget.supplement.quantity.toString());
+    _dailyConsumptionController = TextEditingController(text: widget.supplement.dailyConsumption.toString());
   }
 
-  Future<void> _addSupplement(BuildContext context) async {
+  Future<void> _updateSupplement() async {
     if (_formKey.currentState!.validate()) {
-      final newSupplement = model.Supplement(
-        id: 0, // 新しいサプリメントのIDを指定
+      final updatedSupplement = Supplement(
+        id: widget.supplement.id,
         name: _nameController.text,
         quantity: int.parse(_quantityController.text),
         dailyConsumption: int.parse(_dailyConsumptionController.text),
       );
 
-      // DBHelperを使用して新しいサプリメントをデータベースに追加
-      final dbHelper = db.DBHelper();
-      await dbHelper.insertSupplement(newSupplement);
+      await _dbHelper.updateSupplement(updatedSupplement);
 
-      // 追加後に前の画面に戻る
+      // 更新後に前の画面に戻る
       Navigator.pop(context, true);
     }
   }
@@ -43,7 +46,7 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('サプリメント追加'),
+        title: Text('サプリメント編集'),
       ),
       body: Form(
         key: _formKey,
@@ -85,8 +88,8 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => _addSupplement(context), // BuildContext を渡す
-                child: Text('サプリメントを追加'),
+                onPressed: _updateSupplement,
+                child: Text('サプリメントを更新'),
               ),
             ],
           ),
@@ -94,4 +97,15 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
       ),
     );
   }
+}
+
+void someFunction() {
+  Supplement supplement = Supplement(
+    id: 1,
+    name: 'Vitamin C',
+    quantity: 100,
+    dailyConsumption: 2,
+  );
+
+  print(supplement.id); // ここで id にアクセス
 }

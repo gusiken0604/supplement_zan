@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../database/db_helper.dart';
 import '../models/supplement.dart';
 import 'add_supplement_screen.dart';
+import 'edit_supplement_screen.dart'; // 編集画面のインポート
 import 'package:intl/intl.dart'; // 日付フォーマット用
 
 class HomeScreen extends StatefulWidget {
@@ -31,7 +32,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _navigateToAddScreen() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddSupplementScreen()),
+      MaterialPageRoute(builder: (context) => AddSupplementScreen()),
+    );
+
+    if (result == true) {
+      _loadSupplements();
+    }
+  }
+
+  Future<void> _navigateToEditScreen(Supplement supplement) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditSupplementScreen(supplement: supplement)),
     );
 
     if (result == true) {
@@ -61,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return ListTile(
                   title: Text(supplement.name),
                   subtitle: Text('数量: ${supplement.quantity}\n残量ゼロ予定日: ${_calculateDepletionDate(supplement)}'),
+                  onTap: () => _navigateToEditScreen(supplement), // タップで編集画面に遷移
                 );
               },
             ),
