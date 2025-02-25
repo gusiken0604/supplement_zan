@@ -39,14 +39,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
+Future<void> _loadSupplements() async {
+  final dbHelper = DBHelper();
+  final loadedSupplements = await dbHelper.getAllSupplements();
 
-  Future<void> _loadSupplements() async {
-    final supplements = await _dbHelper.getAllSupplements();
-    setState(() {
-      _supplements = supplements;
-    });
-    _checkSupplements();
-  }
+  setState(() {
+    _supplements = loadedSupplements;
+  });
+
+  print("📦 保存されているサプリメントの数: ${_supplements.length}");
+}
+  // Future<void> _loadSupplements() async {
+  //   final supplements = await _dbHelper.getAllSupplements();
+  //   setState(() {
+  //     _supplements = supplements;
+  //   });
+  //   _checkSupplements();
+  // }
 
   Future<void> _checkSupplements() async {
     for (var supplement in _supplements) {
@@ -98,28 +107,112 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+Future<void> _navigateToEditScreen(Supplement supplement) async {
+  final updatedSupplement = await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => EditSupplementScreen(supplement: supplement)),
+  );
 
-  Future<void> _navigateToAddScreen() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AddSupplementScreen()),
-    );
+  if (updatedSupplement != null && updatedSupplement is Supplement) {
+    setState(() {
+      // ✅ `id` で正しいデータを検索・更新
+      final index = _supplements.indexWhere((s) => s.id == updatedSupplement.id);
+      if (index != -1) {
+        _supplements[index] = updatedSupplement;
+        print("✅ 更新されたサプリメント: ${updatedSupplement.name} (ID: ${updatedSupplement.id})");
+      } else {
+        print("⚠️ 更新対象のサプリメントがリストに見つかりませんでした (ID: ${updatedSupplement.id})");
+      }
+    });
 
-    if (result == true) {
-      _loadSupplements();
-    }
+    _saveSupplements(); // ✅ データベースへ保存
   }
+}
 
-  Future<void> _navigateToEditScreen(Supplement supplement) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EditSupplementScreen(supplement: supplement)),
-    );
+Future<void> _navigateToAddScreen() async {
+  final newSupplement = await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => AddSupplementScreen()),
+  );
 
-    if (result == true) {
-      _loadSupplements();
-    }
+  if (newSupplement != null && newSupplement is Supplement) {
+    setState(() {
+      _supplements.add(newSupplement);
+    });
+
+    print("✅ 追加されたサプリメント: ${newSupplement.name} (ID: ${newSupplement.id})");
+    _saveSupplements(); // ✅ データベースに保存
   }
+}
+// Future<void> _navigateToAddScreen() async {
+//   final newSupplement = await Navigator.push(
+//     context,
+//     MaterialPageRoute(builder: (context) => AddSupplementScreen()),
+//   );
+
+//   if (newSupplement != null && newSupplement is Supplement) {
+//     setState(() {
+//       _supplements.add(newSupplement);
+//     });
+
+//     print("✅ 追加されたサプリメント: ${newSupplement.name} (ID: ${newSupplement.id})");
+//     _saveSupplements();
+//   }
+// }
+// Future<void> _navigateToAddScreen() async {
+//   final newSupplement = await Navigator.push(
+//     context,
+//     MaterialPageRoute(builder: (context) => AddSupplementScreen()),
+//   );
+
+//   if (newSupplement != null && newSupplement is Supplement) {
+//     setState(() {
+//       _supplements.add(newSupplement); // ✅ 追加したサプリメントをリストに追加
+//     });
+
+//     _saveSupplements(); // ✅ データベースに保存
+//   }
+// }
+
+Future<void> _saveSupplements() async {
+  final dbHelper = DBHelper();
+  for (var supplement in _supplements) {
+    await dbHelper.updateSupplement(supplement);
+  }
+}
+// Future<void> _navigateToAddScreen() async {
+//   final newSupplement = await Navigator.push(
+//     context,
+//     MaterialPageRoute(builder: (context) => AddSupplementScreen()),
+//   );
+
+//   if (newSupplement != null && newSupplement is Supplement) {
+//     setState(() {
+//       _supplements.add(newSupplement); // 🔹 追加したサプリメントをリストに追加
+//     });
+//   }
+// }
+  // Future<void> _navigateToAddScreen() async {
+  //   final result = await Navigator.push(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => AddSupplementScreen()),
+  //   );
+
+  //   if (result == true) {
+  //     _loadSupplements();
+  //   }
+  // }
+
+  // Future<void> _navigateToEditScreen(Supplement supplement) async {
+  //   final result = await Navigator.push(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => EditSupplementScreen(supplement: supplement)),
+  //   );
+
+  //   if (result == true) {
+  //     _loadSupplements();
+  //   }
+  // }
 
   Future<void> _navigateToSettingsScreen() async {
     await Navigator.push(

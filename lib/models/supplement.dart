@@ -1,4 +1,3 @@
-
 class Supplement {
   final int id;
   final String name;
@@ -12,7 +11,6 @@ class Supplement {
     required this.dailyConsumption,
   });
 
-  // toMap メソッドを追加
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -21,14 +19,20 @@ class Supplement {
       'dailyConsumption': dailyConsumption,
     };
   }
-
-  // fromMap メソッドを追加
-  factory Supplement.fromMap(Map<String, dynamic> map) {
-    return Supplement(
-      id: map['id'],
-      name: map['name'],
-      quantity: map['quantity'],
-      dailyConsumption: map['dailyConsumption'],
-    );
-  }
+factory Supplement.fromMap(Map<String, dynamic> map) {
+  return Supplement(
+    id: map['id'] ?? 0, // ✅ `ID` を必ず取得（デフォルト値 `0` を回避）
+    name: map['name'],
+    quantity: map['quantity'],
+    dailyConsumption: map['dailyConsumption'],
+  );
+}
+  // factory Supplement.fromMap(Map<String, dynamic> map) {
+  //   return Supplement(
+  //     id: map['id'],
+  //     name: map['name'],
+  //     quantity: map['quantity'],
+  //     dailyConsumption: map['dailyConsumption'],
+  //   );
+  // }
 }

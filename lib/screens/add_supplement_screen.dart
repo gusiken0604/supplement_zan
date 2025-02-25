@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supplement_zan/database/db_helper.dart' as db;
-import 'package:supplement_zan/models/supplement.dart' as model;
+import 'package:supplement_zan/database/db_helper.dart';
+import 'package:supplement_zan/models/supplement.dart';
 
 class AddSupplementScreen extends StatefulWidget {
   @override
@@ -20,24 +20,33 @@ class _AddSupplementScreenState extends State<AddSupplementScreen> {
     _quantityController = TextEditingController();
     _dailyConsumptionController = TextEditingController();
   }
+Future<void> _addSupplement(BuildContext context) async {
+  if (_formKey.currentState!.validate()) {
+    final dbHelper = DBHelper();
 
-  Future<void> _addSupplement(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
-      final newSupplement = model.Supplement(
-        id: 0, // 新しいサプリメントのIDを指定
+    // 🔹 `ID` を `0` にせず、データベースの `ID` を設定する
+    int newId = await dbHelper.insertSupplement(
+      Supplement(
+        id: 0, // 🔴 `0` だが、DBが正しいIDを返す
         name: _nameController.text,
         quantity: int.parse(_quantityController.text),
         dailyConsumption: int.parse(_dailyConsumptionController.text),
-      );
+      ),
+    );
 
-      // DBHelperを使用して新しいサプリメントをデータベースに追加
-      final dbHelper = db.DBHelper();
-      await dbHelper.insertSupplement(newSupplement);
+    final savedSupplement = Supplement(
+      id: newId, // ✅ データベースの `ID` を適用
+      name: _nameController.text,
+      quantity: int.parse(_quantityController.text),
+      dailyConsumption: int.parse(_dailyConsumptionController.text),
+    );
 
-      // 追加後に前の画面に戻る
-      Navigator.pop(context, true);
-    }
+    print("✅ 追加されたサプリメント: ${savedSupplement.name} (ID: ${savedSupplement.id})");
+
+    Navigator.pop(context, savedSupplement);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

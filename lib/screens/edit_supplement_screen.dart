@@ -26,24 +26,23 @@ class _EditSupplementScreenState extends State<EditSupplementScreen> {
     _dailyConsumptionController = TextEditingController(text: widget.supplement.dailyConsumption.toString());
   }
 
-  Future<void> _updateSupplement() async {
-    if (_formKey.currentState!.validate()) {
-      final updatedSupplement = Supplement(
-        id: widget.supplement.id,
-        name: _nameController.text,
-        quantity: int.parse(_quantityController.text),
-        dailyConsumption: int.parse(_dailyConsumptionController.text),
-      );
+Future<void> _updateSupplement(BuildContext context) async {
+  if (_formKey.currentState!.validate()) {
+    final updatedSupplement = Supplement(
+      id: widget.supplement.id, // ✅ `ID` をそのまま保持
+      name: _nameController.text,
+      quantity: int.parse(_quantityController.text),
+      dailyConsumption: int.parse(_dailyConsumptionController.text),
+    );
 
-      await _dbHelper.updateSupplement(updatedSupplement);
+    final dbHelper = DBHelper();
+    await dbHelper.updateSupplement(updatedSupplement);
 
-      // サプリメントの数量を更新
-      await _updateSupplementQuantity(updatedSupplement.id, updatedSupplement.quantity);
+    print("🔄 更新するサプリメント: ${updatedSupplement.name} (ID: ${updatedSupplement.id})");
 
-      // 更新後に前の画面に戻る
-      Navigator.pop(context, true);
-    }
+    Navigator.pop(context, updatedSupplement); // ✅ `ID` を渡して戻る
   }
+}
 
   Future<void> _updateSupplementQuantity(int id, int newQuantity) async {
     await _dbHelper.updateSupplementQuantity(id, newQuantity);
@@ -96,9 +95,13 @@ class _EditSupplementScreenState extends State<EditSupplementScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _updateSupplement,
-                child: Text('サプリメントを更新'),
-              ),
+  onPressed: () => _updateSupplement(context), // ✅ 無名関数で `BuildContext` を渡す
+  child: Text('更新'),
+),
+              // ElevatedButton(
+              //   onPressed: _updateSupplement,
+              //   child: Text('サプリメントを更新'),
+              // ),
             ],
           ),
         ),
