@@ -28,7 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
-    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings();
+    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     final InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
@@ -47,12 +51,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _checkSupplements() async {
     for (var supplement in _supplements) {
       if (supplement.quantity < 10) { // 残数が10未満の場合に通知
+        print('通知を表示: ${supplement.name}'); // デバッグログを追加
         await _showNotification(supplement);
       }
     }
   }
 
   Future<void> _showNotification(Supplement supplement) async {
+    final depletionDate = _calculateDepletionDate(supplement);
+    final notificationMessage = '$depletionDateに${supplement.name}がなくなります。';
+
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'your_channel_id',
       'your_channel_name',
@@ -60,12 +68,34 @@ class _HomeScreenState extends State<HomeScreen> {
       importance: Importance.max,
       priority: Priority.high,
     );
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    const DarwinNotificationDetails iosPlatformChannelSpecifics = DarwinNotificationDetails();
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iosPlatformChannelSpecifics,
+    );
     await flutterLocalNotificationsPlugin.show(
       0,
-      'New Supplement Added',
-      'A new supplement has been added: ${supplement.name}',
+      'サプリメント残数警告',
+      notificationMessage,
       platformChannelSpecifics,
+    );
+  }
+
+  Future<void> _showTestNotification() async {
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      "テスト通知",
+      "バナー通知が正しく表示されるか確認してください。",
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'your_channel_id',
+          'your_channel_name',
+          channelDescription: 'your_channel_description',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
     );
   }
 
@@ -96,6 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
     );
+  }
+
+  Future<void> _updateSupplementQuantity(int id, int newQuantity) async {
+    await _dbHelper.updateSupplementQuantity(id, newQuantity);
+    _loadSupplements();
   }
 
   String _calculateDepletionDate(Supplement supplement) {
@@ -130,9 +165,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddScreen,
-        child: const Icon(Icons.add),
+      floatingActionButton: Stack(
+        children: [
+          // サプリメント追加ボタン
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: FloatingActionButton(
+              onPressed: _navigateToAddScreen,
+              child: const Icon(Icons.add),
+              tooltip: "サプリメントを追加",
+            ),
+          ),
+
+          // 通知テストボタン
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: FloatingActionButton(
+              onPressed: _showTestNotification,
+              child: const Icon(Icons.notifications),
+              tooltip: "テスト通知を送る",
+            ),
+          ),
+        ],
       ),
     );
   }

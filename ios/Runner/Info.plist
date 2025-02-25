@@ -45,5 +45,23 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+	    <string>fetch</string>
+	    <string>remote-notification</string>
+	</array>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>このアプリは、通知を送信するためにトラッキングを使用します。</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+	    <key>NSAllowsArbitraryLoads</key>
+	    <true/>
+	</dict>
+	<key>UNAuthorizationOptionAlert</key>
+	<true/>
+	<key>UNAuthorizationOptionBadge</key>
+	<true/>
+	<key>UNAuthorizationOptionSound</key>
+	<true/>
 </dict>
 </plist>

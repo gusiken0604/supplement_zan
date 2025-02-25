@@ -44,6 +44,16 @@ class DBHelper {
     );
   }
 
+  Future<int> updateSupplementQuantity(int id, int newQuantity) async {
+    final db = await database;
+    return await db.update(
+      'supplements',
+      {'quantity': newQuantity},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<List<Supplement>> getAllSupplements() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('supplements');

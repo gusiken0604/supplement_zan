@@ -37,9 +37,17 @@ class _EditSupplementScreenState extends State<EditSupplementScreen> {
 
       await _dbHelper.updateSupplement(updatedSupplement);
 
+      // サプリメントの数量を更新
+      await _updateSupplementQuantity(updatedSupplement.id, updatedSupplement.quantity);
+
       // 更新後に前の画面に戻る
       Navigator.pop(context, true);
     }
+  }
+
+  Future<void> _updateSupplementQuantity(int id, int newQuantity) async {
+    await _dbHelper.updateSupplementQuantity(id, newQuantity);
+    // 必要に応じて他の処理を追加
   }
 
   @override
@@ -97,15 +105,4 @@ class _EditSupplementScreenState extends State<EditSupplementScreen> {
       ),
     );
   }
-}
-
-void someFunction() {
-  Supplement supplement = Supplement(
-    id: 1,
-    name: 'Vitamin C',
-    quantity: 100,
-    dailyConsumption: 2,
-  );
-
-  print(supplement.id); // ここで id にアクセス
 }
