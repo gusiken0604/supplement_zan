@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _initializeNotifications();
     _loadSupplements();
+    _checkSupplements(); // 🔹 ここで通知チェックを呼ぶ
   }
 
   Future<void> _initializeNotifications() async {
@@ -48,23 +49,18 @@ Future<void> _loadSupplements() async {
   });
 
   print("📦 保存されているサプリメントの数: ${_supplements.length}");
+   _checkSupplements(); // 🔹 データ取得後に実行
 }
-  // Future<void> _loadSupplements() async {
-  //   final supplements = await _dbHelper.getAllSupplements();
-  //   setState(() {
-  //     _supplements = supplements;
-  //   });
-  //   _checkSupplements();
-  // }
-
-  Future<void> _checkSupplements() async {
-    for (var supplement in _supplements) {
-      if (supplement.quantity < 10) { // 残数が10未満の場合に通知
-        print('通知を表示: ${supplement.name}'); // デバッグログを追加
-        await _showNotification(supplement);
-      }
+Future<void> _checkSupplements() async {
+  for (var supplement in _supplements) {
+    if (supplement.quantity < 10) {
+      print('🟡 通知対象: ${supplement.name}, 残量: ${supplement.quantity}'); // デバッグ用ログ
+      await _showNotification(supplement);
+    } else {
+      print('✅ 通知対象外: ${supplement.name}, 残量: ${supplement.quantity}');
     }
   }
+}
 
   Future<void> _showNotification(Supplement supplement) async {
     final depletionDate = _calculateDepletionDate(supplement);
@@ -115,17 +111,14 @@ Future<void> _navigateToEditScreen(Supplement supplement) async {
 
   if (updatedSupplement != null && updatedSupplement is Supplement) {
     setState(() {
-      // ✅ `id` で正しいデータを検索・更新
       final index = _supplements.indexWhere((s) => s.id == updatedSupplement.id);
       if (index != -1) {
         _supplements[index] = updatedSupplement;
-        print("✅ 更新されたサプリメント: ${updatedSupplement.name} (ID: ${updatedSupplement.id})");
-      } else {
-        print("⚠️ 更新対象のサプリメントがリストに見つかりませんでした (ID: ${updatedSupplement.id})");
       }
     });
 
-    _saveSupplements(); // ✅ データベースへ保存
+    _saveSupplements();
+    _checkSupplements(); // 🔹 `Navigator.pop()` 後に `_checkSupplements()` を実行
   }
 }
 
