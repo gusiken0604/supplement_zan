@@ -29,7 +29,7 @@ class _EditSupplementScreenState extends State<EditSupplementScreen> {
 Future<void> _updateSupplement(BuildContext context) async {
   if (_formKey.currentState!.validate()) {
     final updatedSupplement = Supplement(
-      id: widget.supplement.id, // ✅ `ID` をそのまま保持
+      id: widget.supplement.id,
       name: _nameController.text,
       quantity: int.parse(_quantityController.text),
       dailyConsumption: int.parse(_dailyConsumptionController.text),
@@ -40,7 +40,8 @@ Future<void> _updateSupplement(BuildContext context) async {
 
     print("🔄 更新するサプリメント: ${updatedSupplement.name} (ID: ${updatedSupplement.id})");
 
-    Navigator.pop(context, updatedSupplement); // ✅ `ID` を渡して戻る
+    // 🔹 `Navigator.pop()` の戻り値として `updatedSupplement` を渡す
+    Navigator.pop(context, updatedSupplement);
   }
 }
 

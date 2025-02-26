@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart'; 
 import '../database/db_helper.dart';
 import '../models/supplement.dart';
 import 'add_supplement_screen.dart';
@@ -51,16 +52,31 @@ Future<void> _loadSupplements() async {
   print("📦 保存されているサプリメントの数: ${_supplements.length}");
    _checkSupplements(); // 🔹 データ取得後に実行
 }
+
 Future<void> _checkSupplements() async {
+  final prefs = await SharedPreferences.getInstance();
+  final threshold = prefs.getInt('threshold') ?? 10; // 🔹 設定値を取得
+  print("🔍 現在の通知しきい値: $threshold"); // デバッグログ追加
+
   for (var supplement in _supplements) {
-    if (supplement.quantity < 10) {
-      print('🟡 通知対象: ${supplement.name}, 残量: ${supplement.quantity}'); // デバッグ用ログ
+    if (supplement.quantity < threshold) { // 🔹 しきい値を適用
+      print('🟡 通知対象: ${supplement.name}, 残量: ${supplement.quantity}');
       await _showNotification(supplement);
     } else {
       print('✅ 通知対象外: ${supplement.name}, 残量: ${supplement.quantity}');
     }
   }
 }
+// Future<void> _checkSupplements() async {
+//   for (var supplement in _supplements) {
+//     if (supplement.quantity < 10) {
+//       print('🟡 通知対象: ${supplement.name}, 残量: ${supplement.quantity}'); // デバッグ用ログ
+//       await _showNotification(supplement);
+//     } else {
+//       print('✅ 通知対象外: ${supplement.name}, 残量: ${supplement.quantity}');
+//     }
+//   }
+// }
 
   Future<void> _showNotification(Supplement supplement) async {
     final depletionDate = _calculateDepletionDate(supplement);

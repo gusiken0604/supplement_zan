@@ -19,22 +19,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadPreferences();
   }
 
-  Future<void> _loadPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-    _loadThreshold();
-  }
+Future<void> _loadPreferences() async {
+  _prefs = await SharedPreferences.getInstance();
+  await _loadThreshold();
+}
 
-  Future<void> _loadThreshold() async {
-    setState(() {
-      _threshold = _prefs.getInt('threshold') ?? 10;
-      _thresholdController.text = _threshold.toString();
-    });
-  }
+Future<void> _loadThreshold() async {
+  final storedThreshold = _prefs.getInt('threshold') ?? 10;
+  
+  setState(() {
+    _threshold = storedThreshold;
+    _thresholdController.text = storedThreshold.toString();
+  });
 
-  Future<void> _saveThreshold() async {
-    await _prefs.setInt('threshold', int.parse(_thresholdController.text));
-    Navigator.pop(context);
-  }
+  print("🔄 設定画面のしきい値: $_threshold"); // 🔹 デバッグログ
+}
+
+Future<void> _saveThreshold() async {
+  final newThreshold = int.tryParse(_thresholdController.text) ?? 10;
+  await _prefs.setInt('threshold', newThreshold);
+
+  setState(() {
+    _threshold = newThreshold; // 🔹 UI を更新
+  });
+
+  print("✅ 新しい通知しきい値が保存されました: $_threshold"); // 🔹 デバッグログ
+
+  Navigator.pop(context);
+}
 
   @override
   Widget build(BuildContext context) {
